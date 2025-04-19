@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chatbot</title>
+  <style>
+    html, body {
+      margin: 0; padding: 0; height: 100%;
+      font-family: 'Segoe UI', monospace;
+      overflow: hidden; color: white;
+      background-color: #001f3f;
+    }
+
+    .background-text {
+      position: fixed; top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      font-size: 0.8rem; line-height: 1rem;
+      color: rgba(0, 255, 255, 0.1);
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+      z-index: 0; padding: 20px;
+    }
+
+    .header {
+      text-align: center; font-size: 3rem;
+      font-weight: bold; margin-top: 60px;
+      z-index: 2; position: relative;
+    }
+
+    .subheader {
+      text-align: center; margin-top: 10px;
+      font-size: 1.2rem; color: #ddd;
+      z-index: 2; position: relative;
+    }
+
+    .input-box {
+      background-color: rgba(255, 255, 255, 0.08);
+      padding: 30px; border-radius: 15px;
+      width: 400px; margin: 40px auto 0;
+      text-align: center; z-index: 2;
+      position: relative;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .input-box input {
+      padding: 10px; width: 70%;
+      border: none; border-radius: 5px;
+      font-size: 1rem;
+    }
+
+    .input-box button {
+      padding: 10px 15px;
+      background-color: #6b21a8;
+      color: white; border: none;
+      border-radius: 5px; font-size: 1rem;
+      margin-left: 10px; cursor: pointer;
+    }
+
+    .input-box small {
+      display: block; margin-top: 10px;
+      color: #aaa;
+    }
+
+    .status {
+      margin-top: 10px;
+      font-size: 1rem;
+      color: lightgreen;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="background-text" id="code-wall"></div>
+  <div class="header">Chatbot</div>
+  <div class="subheader">Save Your Notes Here</div>
+
+  <div class="input-box">
+    <form id="chatForm">
+      <p>Enter a room number to create or access notes:</p>
+      <input type="text" id="roomInput" placeholder="Type room ID..." required />
+      <button type="submit">Open</button>
+      <small>It's that simple!</small>
+      <div class="status" id="roomStatus"></div>
+    </form>
+  </div>
+
+  <script>
+    // Background code wall
+    const bg = document.getElementById('code-wall');
+    const pattern = 'QWERTYUIOPASDFGHJKLZXCVBNM1234567890';
+    let output = '';
+    const charWidth = 8, charHeight = 16;
+    const charsPerLine = Math.floor(window.innerWidth / charWidth);
+    const lines = Math.floor(window.innerHeight / charHeight);
+
+    for (let i = 0; i < lines; i++) {
+      let line = '';
+      while (line.length < charsPerLine) {
+        line += pattern;
+      }
+      output += line.slice(0, charsPerLine) + '\n';
+    }
+    bg.textContent = output;
+
+    // Form logic
+    const form = document.getElementById('chatForm');
+    const input = document.getElementById('roomInput');
+    const status = document.getElementById('roomStatus');
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const room = input.value.trim();
+      if (!room) return;
+
+      const key = `chat_notes_${room}`;
+      const existing = localStorage.getItem(key);
+
+      if (existing) {
+        const confirmOpen = confirm(`Room "${room}" already exists. Do you want to open it?`);
+        if (confirmOpen) {
+          status.textContent = '✅ Opening existing room...';
+          setTimeout(() => {
+            window.location.href = `chat.html?room=${encodeURIComponent(room)}`;
+          }, 1000);
+        } else {
+          status.textContent = '❌ Cancelled. Try another room ID.';
+        }
+      } else {
+        const confirmCreate = confirm(`Room "${room}" does not exist. Do you want to create a new one?`);
+        if (confirmCreate) {
+          status.textContent = '🆕 Creating new room...';
+          setTimeout(() => {
+            window.location.href = `chat.html?room=${encodeURIComponent(room)}`;
+          }, 1000);
+        } else {
+          status.textContent = '❌ Cancelled. Try another room ID.';
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>
